@@ -2,7 +2,7 @@ import os
 import pydicom
 import pandas as pd
 from tqdm import tqdm
-
+from config_loader import load_config
 
 def detect_series(series_path):
     """
@@ -17,7 +17,8 @@ def detect_series(series_path):
 
     try:
         dcm = pydicom.dcmread(first_file, stop_before_pixels=True)
-        modality = dcm.Modality
+        #modality = dcm.Modality
+        modality = getattr(dcm, "Modality", )
     except:
         modality = "UNKNOWN"
 
@@ -62,12 +63,15 @@ def scan_dataset(data_root):
 
 if __name__ == "__main__":
 
-    DATA_PATH = "data/raw"
+    config = load_config()
 
-    df = scan_dataset(DATA_PATH)
+    data_path = config["data"]["raw_path"]
+    output_file = config["data"]["dataset_index"]
+
+    df = scan_dataset(data_path)
 
     print(df)
 
-    df.to_csv("outputs/dataset_index.csv", index=False)
+    df.to_csv(output_file, index=False)
 
-    print("\nDataset index saved to outputs/dataset_index.csv")
+    print(f"\nDataset index saved to {output_file}")
